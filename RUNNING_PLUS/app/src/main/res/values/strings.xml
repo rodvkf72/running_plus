@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">RUNNING_PLUS</string>
+    <string name="channel_name">test alarm</string>
+    <string name="channel_description">알람 테스트</string>
 </resources>

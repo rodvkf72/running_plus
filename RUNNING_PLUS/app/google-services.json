@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "918116194840",
+    "firebase_url": "https://running-plus-9c5ab.firebaseio.com",
+    "project_id": "running-plus-9c5ab",
+    "storage_bucket": "running-plus-9c5ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:918116194840:android:121d244845016f4f41816d",
+        "android_client_info": {
+          "package_name": "com.example.running_plus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "918116194840-vg3a732eu80onmm8thp3de1d1tvkd7ci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzjTfgyu0ioQ5HiIAeju8AgOXjs8sBOus"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "918116194840-vg3a732eu80onmm8thp3de1d1tvkd7ci.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
