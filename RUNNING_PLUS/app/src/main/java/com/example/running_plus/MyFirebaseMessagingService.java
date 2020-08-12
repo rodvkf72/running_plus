@@ -1,22 +1,14 @@
 package com.example.running_plus;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -30,35 +22,12 @@ import okhttp3.RequestBody;
 public class MyFirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
 
-    private String title = "";
-    private String body = "";
-    private String color = "";
-
     // [START receive_message]
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
+        super.onMessageReceived(remoteMessage);
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-
-        if (remoteMessage.getData().size() > 0) {
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            title = remoteMessage.getData().get("title");
-            Log.d(TAG, "Message data title: " + title);
-            body = remoteMessage.getData().get("body");
-            Log.d(TAG, "Message data body: " + body);
-            color = remoteMessage.getData().get("color");
-            Log.d(TAG, "Message data color: " + color);
-
-            if (true) {
-                scheduleJob();
-            } else {
-                handleNow();
-            }
-        }
-
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: "  + remoteMessage.getNotification().getColor());
-        }
-        sendNotification();
+        sendNotification(remoteMessage);
     }
 
     @Override
@@ -67,20 +36,12 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
         Log.d(TAG, "Refreshed token: " + token);
         Log.d(TAG, "Token name: " + token);
 
+        /*
+        memory save
+        remove remark(//) of the subscriberToTopic(~)
+         */
+        //FirebaseMessaging.getInstance().subscribeToTopic("running_plus_fcm");
         sendRegistrationToServer(token);
-    }
-
-    private void scheduleJob() {
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-        Job myJob = dispatcher.newJobBuilder()
-                .setService(MyJobService.class)
-                .setTag("my-job-tag")
-                .build();
-        dispatcher.schedule(myJob);
-    }
-
-    private void handleNow() {
-        Log.d(TAG, "Short lived task done.");
     }
 
     private void sendRegistrationToServer(String token) {
@@ -89,9 +50,12 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
                 .add("Token", token)
                 .build();
 
-        //request
+        /*
+        request url..
+        Store token value in url when running app for the first time..
+         */
         Request request = new Request.Builder()
-                .url("https://localhost")
+                .url("http://192.168.0.53/running_plus_token_insert.php")
                 .post(body)
                 .build();
 
@@ -102,37 +66,24 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
         }
     }
 
-    private void sendNotification() {
+    //make the channel and send notification..
+    private void sendNotification(RemoteMessage remoteMessage) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                PendingIntent.FLAG_ONE_SHOT);
-
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         String channelId = "alarm_channel_id";
-        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setContentText(body)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_launcher_background)
+                .setContentTitle(remoteMessage.getNotification().getTitle())
+                .setContentText(remoteMessage.getNotification().getBody())
                 .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
-                .setPriority(Notification.PRIORITY_HIGH);
-
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                .setContentIntent(pendingIntent);
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel =
-                    new NotificationChannel(
-                            channelId,
-                            "alarm test",
-                            NotificationManager.IMPORTANCE_DEFAULT
-                    );
-            //notificationChannel.setDescription("알람 테스트");
-            notificationManager.createNotificationChannel(notificationChannel);
+            NotificationChannel channel = new NotificationChannel(channelId, "Default alarm_channel_id", NotificationManager.IMPORTANCE_DEFAULT);
+            manager.createNotificationChannel(channel);
         }
-
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        manager.notify(0, builder.build());
     }
 }

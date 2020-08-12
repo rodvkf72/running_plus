@@ -9,7 +9,7 @@ public class MyJobService extends JobService {
     private static final String TAG = "MyJobService";
 
     @Override
-    public boolean onStartJob(com.firebase.jobdispatcher.JobParameters job) {
+    public boolean onStartJob(JobParameters job) {
         Log.d(TAG, "Performing log running task in scheduled job");
         return false;
     }

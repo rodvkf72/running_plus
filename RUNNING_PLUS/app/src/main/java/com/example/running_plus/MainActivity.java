@@ -14,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -31,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private final String title = "타이틀";
     private final String content = "내용";
 
+    Intent foregroundServiceIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,19 +41,37 @@ public class MainActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
-        FirebaseMessaging.getInstance().subscribeToTopic("news");
+        /*
+        memory over run..
+        if want only once subscribed remark(//) the subscribeToTopic(~) line
+        and go onNewToken of MyFirebaseMessagingService.class
+         */
+        FirebaseMessaging.getInstance().subscribeToTopic("running_plus_fcm");
         FirebaseInstanceId.getInstance().getToken();
 
+
+        // xml web page view
         mWebView = findViewById(R.id.testWebview);
 
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setLoadWithOverviewMode(true);
 
-        mWebView.setWebViewClient(new WebViewClient(){});
+        mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.setWebViewClient(new WebViewClient());
         mWebView.loadUrl(urladdr);
+
+
+        if (null == UndeadService.serviceIntent) {
+            foregroundServiceIntent = new Intent(this, UndeadService.class);
+            startService(foregroundServiceIntent);
+
+        } else {
+            foregroundServiceIntent = UndeadService.serviceIntent;
+        }
     }
 
+    // quit process check
     public void onBackPressed(){
         long tempTime = System.currentTimeMillis();
         long intervalTime = tempTime - backPressedTime;
@@ -65,19 +86,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.channel_name);
-            String description = getString(R.string.channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("alarm_channel_id", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+    @Override
+    protected  void onDestroy() {
+        super.onDestroy();
+
+        if (null != foregroundServiceIntent) {
+            stopService(foregroundServiceIntent);
+            foregroundServiceIntent = null;
         }
     }
 }
