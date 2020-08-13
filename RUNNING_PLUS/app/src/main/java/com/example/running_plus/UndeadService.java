@@ -1,6 +1,8 @@
 package com.example.running_plus;
 
+import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,10 +11,16 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Calendar;
 
@@ -37,7 +45,7 @@ public class UndeadService extends Service {
     it will be running the notification message..
      */
     public void initializeNotification() {
-               Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         String channelId = "1";
@@ -46,16 +54,19 @@ public class UndeadService extends Service {
                 .setContentText("Running Plus 앱이 실행중입니다.")
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
+
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId, "Default alarm_channel_id", NotificationManager.IMPORTANCE_DEFAULT);
             manager.createNotificationChannel(channel);
         }
-        //manager.notify(0, builder.build());
-        Notification notification = builder.build();
-        startForeground(1, notification);
-        manager.cancel(1);
+        manager.notify(10, builder.build());
+        //Notification notification = builder.build();
+        startForeground(10, builder.build());
+        //manager.cancel(10);
+        //manager.cancelAll();
+        stopForeground(true);
     }
 
     @Override

@@ -1,8 +1,13 @@
 package com.example.running_plus;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.ProcessLifecycleOwner;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -61,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
         mWebView.setWebViewClient(new WebViewClient());
         mWebView.loadUrl(urladdr);
 
+        ProcessLifecycleOwner.get().getLifecycle();
+
 
         if (null == UndeadService.serviceIntent) {
             foregroundServiceIntent = new Intent(this, UndeadService.class);
@@ -84,6 +91,16 @@ public class MainActivity extends AppCompatActivity {
             backPressedTime = tempTime;
             Toast.makeText(getApplicationContext(), "종료를 원하시면 한번 더 누르세요.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

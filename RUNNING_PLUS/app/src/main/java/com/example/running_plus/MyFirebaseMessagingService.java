@@ -66,17 +66,21 @@ public class MyFirebaseMessagingService extends com.google.firebase.messaging.Fi
         }
     }
 
-    //make the channel and send notification..
+    /*
+    make the channel and send notification..
+    if you want the customization, used with .setContentTitle(~)
+     */
     private void sendNotification(RemoteMessage remoteMessage) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-        String channelId = "alarm_channel_id";
+        String channelId = "20";
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentTitle(remoteMessage.getNotification().getTitle())
                 .setContentText(remoteMessage.getNotification().getBody())
                 .setAutoCancel(true)
+                .setVibrate(new long[] { 0 } )
                 .setContentIntent(pendingIntent);
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
